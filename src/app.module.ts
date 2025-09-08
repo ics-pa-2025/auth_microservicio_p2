@@ -8,6 +8,7 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import {typeOrmAsyncConfig} from './config/database.config';
 import {RoleModule} from './role/role.module';
 import {PermissionModule} from './permission/permission.module';
+import {RbacSeeder} from "./seeder/rbac.seeder";
 
 @Module({
     imports: [
@@ -21,7 +22,7 @@ import {PermissionModule} from './permission/permission.module';
         PermissionModule,
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [AppService, RbacSeeder],
 })
 export class AppModule {
 }

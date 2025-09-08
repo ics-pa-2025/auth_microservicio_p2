@@ -1,7 +1,8 @@
-import {Injectable} from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {User} from "./entities/user.entity";
+import {Role} from 'src/role/entities/role.entity';
 
 
 @Injectable()
@@ -9,6 +10,8 @@ export class UserService {
     constructor(
         @InjectRepository(User)
         private readonly repo: Repository<User>,
+        @InjectRepository(Role)
+        private roleRepository: Repository<Role>,
     ) {
     }
 
@@ -30,4 +33,71 @@ export class UserService {
     async setRefreshTokenHash(userId: string, refreshTokenHash: string | null) {
         await this.repo.update({id: userId}, {refreshTokenHash});
     }
+
+
+    async assignRoles(userId: string, roleIds: string[]): Promise<User> {
+        const user = await this.repo.findOne({
+            where: {id: userId},
+            relations: ['roles']
+        });
+
+        if (!user) {
+            throw new NotFoundException('Usuario no encontrado');
+        }
+
+        const roles = await this.roleRepository.findByIds(roleIds);
+        if (roles.length !== roleIds.length) {
+            throw new NotFoundException('Algunos roles no fueron encontrados');
+        }
+
+        user.roles = [...user.roles, ...roles];
+        return this.repo.save(user);
+    }
+
+    async removeRoles(userId: string, roleIds: string[]): Promise<User> {
+        const user = await this.repo.findOne({
+            where: {id: userId},
+            relations: ['roles']
+        });
+
+        if (!user) {
+            throw new NotFoundException('Usuario no encontrado');
+        }
+
+        user.roles = user.roles.filter(role => !roleIds.includes(role.id));
+        return this.repo.save(user);
+    }
+
+    async setRoles(userId: string, roleIds: string[]): Promise<User> {
+        const user = await this.repo.findOne({
+            where: {id: userId},
+            relations: ['roles']
+        });
+
+        if (!user) {
+            throw new NotFoundException('Usuario no encontrado');
+        }
+
+        const roles = await this.roleRepository.findByIds(roleIds);
+        if (roles.length !== roleIds.length) {
+            throw new NotFoundException('Algunos roles no fueron encontrados');
+        }
+
+        user.roles = roles;
+        return this.repo.save(user);
+    }
+
+    async getUserWithRoles(id: string): Promise<User> {
+        const user = await this.repo.findOne({
+            where: {id},
+            relations: ['roles', 'roles.permissions']
+        });
+
+        if (!user) {
+            throw new NotFoundException('Usuario no encontrado');
+        }
+
+        return user;
+    }
+
 }
