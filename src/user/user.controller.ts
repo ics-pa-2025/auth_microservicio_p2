@@ -1,33 +1,43 @@
-import {Controller} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, ValidationPipe} from '@nestjs/common';
 import {UserService} from './user.service';
+import {RequirePermissions} from 'src/decorators/permissions.decorator';
+import {AssignRolesDto} from "./dto/assign-roles.dto";
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {
     }
 
-    // @Post()
-    // create(@Body() createUserDto: CreateUserDto) {
-    //   return this.userService.create(createUserDto);
-    // }
-    //
-    // @Get()
-    // findAll() {
-    //   return this.userService.findAll();
-    // }
-    //
-    // @Get(':id')
-    // findOne(@Param('id') id: string) {
-    //   return this.userService.findOne(+id);
-    // }
-    //
-    // @Patch(':id')
-    // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    //   return this.userService.update(+id, updateUserDto);
-    // }
-    //
-    // @Delete(':id')
-    // remove(@Param('id') id: string) {
-    //   return this.userService.remove(+id);
-    // }
+    @Get(':id/roles')
+    @RequirePermissions('users:read')
+    getUserWithRoles(@Param('id') id: string) {
+        return this.userService.getUserWithRoles(id);
+    }
+
+    @Post(':id/roles')
+    @RequirePermissions('users:update')
+    assignRoles(
+        @Param('id') id: string,
+        @Body(ValidationPipe) assignRolesDto: AssignRolesDto
+    ) {
+        return this.userService.assignRoles(id, assignRolesDto.roleIds);
+    }
+
+    @Delete(':id/roles')
+    @RequirePermissions('users:update')
+    removeRoles(
+        @Param('id') id: string,
+        @Body(ValidationPipe) assignRolesDto: AssignRolesDto
+    ) {
+        return this.userService.removeRoles(id, assignRolesDto.roleIds);
+    }
+
+    @Put(':id/roles')
+    @RequirePermissions('users:update')
+    setRoles(
+        @Param('id') id: string,
+        @Body(ValidationPipe) assignRolesDto: AssignRolesDto
+    ) {
+        return this.userService.setRoles(id, assignRolesDto.roleIds);
+    }
 }
