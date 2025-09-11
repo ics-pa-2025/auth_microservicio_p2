@@ -33,8 +33,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/ics-pa-2025/Microservicio-Auth:latest
-            ghcr.io/ics-pa-2025/Microservicio-Auth:${{ github.sha }}
+            ghcr.io/ics-pa-2025/microservicio-auth:latest
+            ghcr.io/ics-pa-2025/microservicio-auth:${{ github.sha }}
           progress: plain
 
       # Listar imágenes locales para verificar
@@ -47,4 +47,4 @@ jobs:
         with:
           app-name: user-auth
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: ghcr.io/ics-pa-2025/Microservicio-Auth:latest
+          images: ghcr.io/ics-pa-2025/microservicio-auth:latest
