@@ -7,13 +7,13 @@ services:
       - .env
     environment:
       MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - microservices
 
   auth:
     image: node:20
@@ -42,6 +42,13 @@ services:
       PORT: ${PORT}
       FRONTEND_URL_DEV: ${FRONTEND_URL_DEV}
       FRONTEND_URL_PROD: ${FRONTEND_URL_PROD}
+    networks:
+      - microservices
 
 volumes:
   mysql_data:
+
+networks:
+  microservices:
+    name: shared-microservices
+    external: false
