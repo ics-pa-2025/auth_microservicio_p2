@@ -39,7 +39,9 @@ services:
       - '3001:3001'
     networks:
       - microservices
-
+volumes:
+  mysql_data:
+  
 networks:
   microservices:
     name: safestore-microservices
