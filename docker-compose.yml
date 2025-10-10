@@ -1,7 +1,7 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql-auth
+    container_name: mysql-auth-safestore
     restart: always
     env_file:
       - .env
@@ -17,7 +17,7 @@ services:
 
   auth:
     image: node:20
-    container_name: auth-service
+    container_name: auth-service-safestore
     working_dir: /app
     env_file:
       - .env
