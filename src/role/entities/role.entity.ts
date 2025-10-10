@@ -6,23 +6,23 @@ import {
     JoinTable,
     ManyToMany,
     PrimaryGeneratedColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
 } from 'typeorm';
-import {User} from "../../user/entities/user.entity";
-import {Permission} from "../../permission/entities/permission.entity";
+import { User } from '../../user/entities/user.entity';
+import { Permission } from '../../permission/entities/permission.entity';
 
 @Entity('roles')
 export class Role {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({unique: true})
+    @Column({ unique: true })
     name: string;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     description?: string;
 
-    @Column({default: true})
+    @Column({ default: true })
     isActive: boolean;
 
     // Relación Many-to-Many con User
@@ -30,7 +30,9 @@ export class Role {
     users: User[];
 
     // Relación Many-to-Many con Permission
-    @ManyToMany(() => Permission, (permission) => permission.roles, {eager: true})
+    @ManyToMany(() => Permission, (permission) => permission.roles, {
+        eager: true,
+    })
     @JoinTable({
         name: 'role_permissions',
         joinColumn: {
@@ -52,6 +54,10 @@ export class Role {
 
     // Método helper para verificar si tiene un permiso específico
     hasPermission(permissionName: string): boolean {
-        return this.permissions?.some(permission => permission.name === permissionName) || false;
+        return (
+            this.permissions?.some(
+                (permission) => permission.name === permissionName
+            ) || false
+        );
     }
 }

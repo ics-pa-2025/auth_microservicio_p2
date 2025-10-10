@@ -1,19 +1,22 @@
-import {BadRequestException, Injectable, UnauthorizedException,} from '@nestjs/common';
-import {UserService} from '../user/user.service';
-import {JwtService} from '@nestjs/jwt';
-import {ConfigService} from '@nestjs/config';
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
+import { UserService } from '../user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
-import {RegisterDto} from './dto/regiter.dto';
-import {LoginDto} from './dto/login.dto';
+import { RegisterDto } from './dto/regiter.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly users: UserService,
         private readonly jwt: JwtService,
-        private readonly config: ConfigService, // Inyectar ConfigService
-    ) {
-    }
+        private readonly config: ConfigService // Inyectar ConfigService
+    ) {}
 
     // ---------- REGISTRO ----------
     async register(registerDto: RegisterDto) {
@@ -22,18 +25,23 @@ export class AuthService {
 
         // Validación adicional de contraseña
         if (registerDto.password.length < 8) {
-            throw new BadRequestException('La contraseña debe tener al menos 8 caracteres');
+            throw new BadRequestException(
+                'La contraseña debe tener al menos 8 caracteres'
+            );
         }
 
         const passwordHash = await this.hash(registerDto.password);
         const user = await this.users.create(registerDto.email, passwordHash);
 
-        const {accessToken, refreshToken} = await this.issueTokens(user.id, user.email);
+        const { accessToken, refreshToken } = await this.issueTokens(
+            user.id,
+            user.email
+        );
 
         return {
             accessToken,
             refreshToken,
-            user: {id: user.id, email: user.email} // No devolver hash de password
+            user: { id: user.id, email: user.email }, // No devolver hash de password
         };
     }
 
@@ -48,12 +56,15 @@ export class AuthService {
         // Opcional: Verificar si el usuario está activo/verificado
         // if (!user.isActive) throw new ForbiddenException('Cuenta desactivada');
 
-        const {accessToken, refreshToken} = await this.issueTokens(user.id, user.email);
+        const { accessToken, refreshToken } = await this.issueTokens(
+            user.id,
+            user.email
+        );
 
         return {
             accessToken,
             refreshToken,
-            user: {id: user.id, email: user.email}
+            user: { id: user.id, email: user.email },
         };
     }
 
@@ -77,15 +88,16 @@ export class AuthService {
                 throw new UnauthorizedException('Token inválido');
             }
 
-            const valid = await this.verifyHash(refreshToken, user.refreshTokenHash);
+            const valid = await this.verifyHash(
+                refreshToken,
+                user.refreshTokenHash
+            );
             if (!valid) throw new UnauthorizedException('Token inválido');
 
-            const {accessToken, refreshToken: newRefresh} = await this.issueTokens(
-                user.id,
-                user.email,
-            );
+            const { accessToken, refreshToken: newRefresh } =
+                await this.issueTokens(user.id, user.email);
 
-            return {accessToken, refreshToken: newRefresh};
+            return { accessToken, refreshToken: newRefresh };
         } catch (error) {
             // Log del error para debugging (opcional)
             console.error('Error refreshing token:', error.message);
@@ -97,7 +109,7 @@ export class AuthService {
     async logout(userId: string) {
         // Invalidar el refresh token del usuario
         await this.users.setRefreshTokenHash(userId, null);
-        return {message: 'Logout exitoso'};
+        return { message: 'Logout exitoso' };
     }
 
     // ---------- VALIDACIÓN DE TOKEN (manual) ----------
@@ -110,7 +122,7 @@ export class AuthService {
             // Verificar que el usuario aún existe
             const user = await this.users.findByEmail(payload.email);
             if (!user) {
-                return {valid: false};
+                return { valid: false };
             }
 
             return {
@@ -121,7 +133,7 @@ export class AuthService {
                 exp: payload.exp,
             };
         } catch (error) {
-            return {valid: false};
+            return { valid: false };
         }
     }
 
@@ -133,7 +145,7 @@ export class AuthService {
 
         await this.users.setRefreshTokenHash(userId, refreshTokenHash);
 
-        return {accessToken, refreshToken};
+        return { accessToken, refreshToken };
     }
 
     private async hash(data: string): Promise<string> {
@@ -146,7 +158,7 @@ export class AuthService {
     }
 
     private signAccessToken(userId: string, email: string): string {
-        const payload = {sub: userId, email};
+        const payload = { sub: userId, email };
         return this.jwt.sign(payload, {
             secret: this.config.get<string>('JWT_ACCESS_SECRET'),
             expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES') || '15m',
@@ -154,7 +166,7 @@ export class AuthService {
     }
 
     private signRefreshToken(userId: string, email: string): string {
-        const payload = {sub: userId, email, type: 'refresh'};
+        const payload = { sub: userId, email, type: 'refresh' };
         return this.jwt.sign(payload, {
             secret: this.config.get<string>('JWT_REFRESH_SECRET'),
             expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES') || '7d',

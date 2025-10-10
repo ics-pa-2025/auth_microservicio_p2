@@ -1,14 +1,23 @@
-import {Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards, ValidationPipe} from '@nestjs/common';
-import {AuthService} from './auth.service';
-import {RegisterDto} from './dto/regiter.dto';
-import {LoginDto} from './dto/login.dto';
-import {RefreshDto} from "./dto/refresh.dto";
-import {JwtAuthGuard} from '../guards/jwt-auth.guard';
+import {
+    Body,
+    Controller,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Post,
+    Req,
+    UseGuards,
+    ValidationPipe,
+} from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/regiter.dto';
+import { LoginDto } from './dto/login.dto';
+import { RefreshDto } from './dto/refresh.dto';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) {
-    }
+    constructor(private readonly authService: AuthService) {}
 
     @Post('register')
     @HttpCode(HttpStatus.CREATED)
@@ -40,13 +49,13 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     async validate(@Req() req: any) {
         // req.user viene del JwtStrategy
-        return {valid: true, user: req.user};
+        return { valid: true, user: req.user };
     }
 
     // Endpoint para obtener perfil del usuario autenticado
     @Get('me')
     @UseGuards(JwtAuthGuard)
     async getProfile(@Req() req: any) {
-        return {user: req.user};
+        return { user: req.user };
     }
 }

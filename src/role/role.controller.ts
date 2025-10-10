@@ -10,21 +10,20 @@ import {
     Post,
     Put,
     UseGuards,
-    ValidationPipe
+    ValidationPipe,
 } from '@nestjs/common';
-import {RoleService} from './role.service';
-import {CreateRoleDto} from "./dto/create-role.dto";
-import {UpdateRoleDto} from './dto/update-role.dto';
-import {AssignPermissionsDto} from "../permission/dto/assign-permission.dto";
-import {JwtAuthGuard} from '../guards/jwt-auth.guard';
-import {RolesGuard} from '../guards/roles.guard';
-import {RequirePermissions} from '../decorators/permissions.decorator';
+import { RoleService } from './role.service';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
+import { AssignPermissionsDto } from '../permission/dto/assign-permission.dto';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
+import { RequirePermissions } from '../decorators/permissions.decorator';
 
 @Controller('roles')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class RoleController {
-    constructor(private readonly roleService: RoleService) {
-    }
+    constructor(private readonly roleService: RoleService) {}
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
@@ -47,7 +46,10 @@ export class RoleController {
 
     @Patch(':id')
     @RequirePermissions('roles:update')
-    update(@Param('id') id: string, @Body(ValidationPipe) updateRoleDto: UpdateRoleDto) {
+    update(
+        @Param('id') id: string,
+        @Body(ValidationPipe) updateRoleDto: UpdateRoleDto
+    ) {
         return this.roleService.update(id, updateRoleDto);
     }
 
@@ -64,7 +66,10 @@ export class RoleController {
         @Param('id') id: string,
         @Body(ValidationPipe) assignPermissionsDto: AssignPermissionsDto
     ) {
-        return this.roleService.addPermissions(id, assignPermissionsDto.permissionIds);
+        return this.roleService.addPermissions(
+            id,
+            assignPermissionsDto.permissionIds
+        );
     }
 
     @Delete(':id/permissions')
@@ -73,7 +78,10 @@ export class RoleController {
         @Param('id') id: string,
         @Body(ValidationPipe) assignPermissionsDto: AssignPermissionsDto
     ) {
-        return this.roleService.removePermissions(id, assignPermissionsDto.permissionIds);
+        return this.roleService.removePermissions(
+            id,
+            assignPermissionsDto.permissionIds
+        );
     }
 
     @Put(':id/permissions')
@@ -82,6 +90,9 @@ export class RoleController {
         @Param('id') id: string,
         @Body(ValidationPipe) assignPermissionsDto: AssignPermissionsDto
     ) {
-        return this.roleService.setPermissions(id, assignPermissionsDto.permissionIds);
+        return this.roleService.setPermissions(
+            id,
+            assignPermissionsDto.permissionIds
+        );
     }
 }

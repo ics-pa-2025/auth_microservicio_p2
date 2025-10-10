@@ -1,10 +1,14 @@
-import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Repository} from 'typeorm';
-import {Role} from "./entities/role.entity";
-import {Permission} from "../permission/entities/permission.entity";
-import {UpdateRoleDto} from "./dto/update-role.dto";
-import {CreateRoleDto} from "./dto/create-role.dto";
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Role } from './entities/role.entity';
+import { Permission } from '../permission/entities/permission.entity';
+import { UpdateRoleDto } from './dto/update-role.dto';
+import { CreateRoleDto } from './dto/create-role.dto';
 
 @Injectable()
 export class RoleService {
@@ -12,13 +16,12 @@ export class RoleService {
         @InjectRepository(Role)
         private roleRepository: Repository<Role>,
         @InjectRepository(Permission)
-        private permissionRepository: Repository<Permission>,
-    ) {
-    }
+        private permissionRepository: Repository<Permission>
+    ) {}
 
     async create(createRoleDto: CreateRoleDto): Promise<Role> {
         const existingRole = await this.roleRepository.findOne({
-            where: {name: createRoleDto.name}
+            where: { name: createRoleDto.name },
         });
 
         if (existingRole) {
@@ -32,14 +35,14 @@ export class RoleService {
     async findAll(): Promise<Role[]> {
         return this.roleRepository.find({
             relations: ['permissions'],
-            where: {isActive: true}
+            where: { isActive: true },
         });
     }
 
     async findOne(id: string): Promise<Role> {
         const role = await this.roleRepository.findOne({
-            where: {id, isActive: true},
-            relations: ['permissions', 'users']
+            where: { id, isActive: true },
+            relations: ['permissions', 'users'],
         });
 
         if (!role) {
@@ -51,8 +54,8 @@ export class RoleService {
 
     async findByName(name: string): Promise<Role | null> {
         return this.roleRepository.findOne({
-            where: {name, isActive: true},
-            relations: ['permissions']
+            where: { name, isActive: true },
+            relations: ['permissions'],
         });
     }
 
@@ -61,10 +64,12 @@ export class RoleService {
 
         if (updateRoleDto.name && updateRoleDto.name !== role.name) {
             const existingRole = await this.roleRepository.findOne({
-                where: {name: updateRoleDto.name}
+                where: { name: updateRoleDto.name },
             });
             if (existingRole) {
-                throw new BadRequestException('Ya existe un rol con ese nombre');
+                throw new BadRequestException(
+                    'Ya existe un rol con ese nombre'
+                );
             }
         }
 
@@ -78,32 +83,47 @@ export class RoleService {
         await this.roleRepository.save(role);
     }
 
-    async addPermissions(roleId: string, permissionIds: string[]): Promise<Role> {
+    async addPermissions(
+        roleId: string,
+        permissionIds: string[]
+    ): Promise<Role> {
         const role = await this.findOne(roleId);
-        const permissions = await this.permissionRepository.findByIds(permissionIds);
+        const permissions =
+            await this.permissionRepository.findByIds(permissionIds);
 
         if (permissions.length !== permissionIds.length) {
-            throw new NotFoundException('Algunos permisos no fueron encontrados');
+            throw new NotFoundException(
+                'Algunos permisos no fueron encontrados'
+            );
         }
 
         role.permissions = [...role.permissions, ...permissions];
         return this.roleRepository.save(role);
     }
 
-    async removePermissions(roleId: string, permissionIds: string[]): Promise<Role> {
+    async removePermissions(
+        roleId: string,
+        permissionIds: string[]
+    ): Promise<Role> {
         const role = await this.findOne(roleId);
         role.permissions = role.permissions.filter(
-            permission => !permissionIds.includes(permission.id)
+            (permission) => !permissionIds.includes(permission.id)
         );
         return this.roleRepository.save(role);
     }
 
-    async setPermissions(roleId: string, permissionIds: string[]): Promise<Role> {
+    async setPermissions(
+        roleId: string,
+        permissionIds: string[]
+    ): Promise<Role> {
         const role = await this.findOne(roleId);
-        const permissions = await this.permissionRepository.findByIds(permissionIds);
+        const permissions =
+            await this.permissionRepository.findByIds(permissionIds);
 
         if (permissions.length !== permissionIds.length) {
-            throw new NotFoundException('Algunos permisos no fueron encontrados');
+            throw new NotFoundException(
+                'Algunos permisos no fueron encontrados'
+            );
         }
 
         role.permissions = permissions;

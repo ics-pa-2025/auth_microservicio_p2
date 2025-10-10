@@ -6,29 +6,29 @@ import {
     JoinTable,
     ManyToMany,
     PrimaryGeneratedColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
 } from 'typeorm';
-import {Role} from "../../role/entities/role.entity";
+import { Role } from '../../role/entities/role.entity';
 
 @Entity('user')
 export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({unique: true})
+    @Column({ unique: true })
     email: string;
 
     @Column()
     password: string;
 
-    @Column({default: true})
+    @Column({ default: true })
     isActive: boolean;
 
-    @Column({type: 'varchar', length: 255, nullable: true, default: null})
+    @Column({ type: 'varchar', length: 255, nullable: true, default: null })
     refreshTokenHash?: string | null;
 
     // Relación Many-to-Many con Role
-    @ManyToMany(() => Role, (role) => role.users, {eager: true})
+    @ManyToMany(() => Role, (role) => role.users, { eager: true })
     @JoinTable({
         name: 'user_roles',
         joinColumn: {
@@ -50,7 +50,7 @@ export class User {
 
     // Método helper para verificar si tiene un rol específico
     hasRole(roleName: string): boolean {
-        return this.roles?.some(role => role.name === roleName) || false;
+        return this.roles?.some((role) => role.name === roleName) || false;
     }
 
     // Método helper para obtener todos los permisos del usuario
@@ -58,8 +58,8 @@ export class User {
         if (!this.roles) return [];
 
         const permissions = new Set<string>();
-        this.roles.forEach(role => {
-            role.permissions?.forEach(permission => {
+        this.roles.forEach((role) => {
+            role.permissions?.forEach((permission) => {
                 permissions.add(permission.name);
             });
         });

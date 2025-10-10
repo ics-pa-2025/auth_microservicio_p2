@@ -1,12 +1,20 @@
-import {Body, Controller, Delete, Get, Param, Post, Put, ValidationPipe} from '@nestjs/common';
-import {UserService} from './user.service';
-import {RequirePermissions} from 'src/decorators/permissions.decorator';
-import {AssignRolesDto} from "./dto/assign-roles.dto";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Put,
+    ValidationPipe,
+} from '@nestjs/common';
+import { UserService } from './user.service';
+import { RequirePermissions } from 'src/decorators/permissions.decorator';
+import { AssignRolesDto } from './dto/assign-roles.dto';
 
 @Controller('user')
 export class UserController {
-    constructor(private readonly userService: UserService) {
-    }
+    constructor(private readonly userService: UserService) {}
 
     @Get(':id/roles')
     @RequirePermissions('users:read')

@@ -1,9 +1,8 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Repository} from 'typeorm';
-import {User} from "./entities/user.entity";
-import {Role} from 'src/role/entities/role.entity';
-
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { Role } from 'src/role/entities/role.entity';
 
 @Injectable()
 export class UserService {
@@ -11,34 +10,30 @@ export class UserService {
         @InjectRepository(User)
         private readonly repo: Repository<User>,
         @InjectRepository(Role)
-        private roleRepository: Repository<Role>,
-    ) {
-    }
-
+        private roleRepository: Repository<Role>
+    ) {}
 
     findByEmail(email: string) {
-        return this.repo.findOne({where: {email}});
+        return this.repo.findOne({ where: { email } });
     }
 
-
     findById(id: string) {
-        return this.repo.findOne({where: {id}});
+        return this.repo.findOne({ where: { id } });
     }
 
     async create(email: string, password: string) {
-        const user = this.repo.create({email, password});
+        const user = this.repo.create({ email, password });
         return this.repo.save(user);
     }
 
     async setRefreshTokenHash(userId: string, refreshTokenHash: string | null) {
-        await this.repo.update({id: userId}, {refreshTokenHash});
+        await this.repo.update({ id: userId }, { refreshTokenHash });
     }
-
 
     async assignRoles(userId: string, roleIds: string[]): Promise<User> {
         const user = await this.repo.findOne({
-            where: {id: userId},
-            relations: ['roles']
+            where: { id: userId },
+            relations: ['roles'],
         });
 
         if (!user) {
@@ -56,22 +51,22 @@ export class UserService {
 
     async removeRoles(userId: string, roleIds: string[]): Promise<User> {
         const user = await this.repo.findOne({
-            where: {id: userId},
-            relations: ['roles']
+            where: { id: userId },
+            relations: ['roles'],
         });
 
         if (!user) {
             throw new NotFoundException('Usuario no encontrado');
         }
 
-        user.roles = user.roles.filter(role => !roleIds.includes(role.id));
+        user.roles = user.roles.filter((role) => !roleIds.includes(role.id));
         return this.repo.save(user);
     }
 
     async setRoles(userId: string, roleIds: string[]): Promise<User> {
         const user = await this.repo.findOne({
-            where: {id: userId},
-            relations: ['roles']
+            where: { id: userId },
+            relations: ['roles'],
         });
 
         if (!user) {
@@ -89,8 +84,8 @@ export class UserService {
 
     async getUserWithRoles(id: string): Promise<User> {
         const user = await this.repo.findOne({
-            where: {id},
-            relations: ['roles', 'roles.permissions']
+            where: { id },
+            relations: ['roles', 'roles.permissions'],
         });
 
         if (!user) {
@@ -99,5 +94,4 @@ export class UserService {
 
         return user;
     }
-
 }

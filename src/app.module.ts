@@ -13,25 +13,25 @@ import { corsConfig } from './config/cors.config';
 import * as cors from 'cors';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    TypeOrmModule.forRootAsync(typeOrmAsyncConfig),
-    AuthModule,
-    UserModule,
-    RoleModule,
-    PermissionModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService, RbacSeeder],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
+        TypeOrmModule.forRootAsync(typeOrmAsyncConfig),
+        AuthModule,
+        UserModule,
+        RoleModule,
+        PermissionModule,
+    ],
+    controllers: [AppController],
+    providers: [AppService, RbacSeeder],
 })
 export class AppModule implements NestModule {
-  constructor(private readonly configService: ConfigService) {} // inyectamos ConfigService
+    constructor(private readonly configService: ConfigService) {} // inyectamos ConfigService
 
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(cors(corsConfig(this.configService))) // <-- pasamos la instancia
-      .forRoutes('*');
-  }
+    configure(consumer: MiddlewareConsumer) {
+        consumer
+            .apply(cors(corsConfig(this.configService))) // <-- pasamos la instancia
+            .forRoutes('*');
+    }
 }
