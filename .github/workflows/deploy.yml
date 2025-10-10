@@ -1,50 +1,71 @@
-name: Build and Deploy to Azure using GHCR
+name: CI/CD - Build & Deploy (auth)
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches: [ main ]
 
 jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-        steps:
-            # Clonar el repositorio
-            - name: Checkout code
-              uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-            # Login a GitHub Container Registry
-            - name: Login to GitHub Container Registry
-              uses: docker/login-action@v2
-              with:
-                  registry: ghcr.io
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.ORG_GHCR_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-            # Setup Docker Buildx
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v2
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-            # Construir y pushear imagen con logs detallados
-            - name: Build docker image and push GHCR
-              uses: docker/build-push-action@v4
-              with:
-                  context: .
-                  push: true
-                  tags: |
-                      ghcr.io/ics-pa-2025/microservicio-auth:latest
-                      ghcr.io/ics-pa-2025/microservicio-auth:${{ github.sha }}
-                  progress: plain
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/safestore-auth:latest
 
-            # Listar imágenes locales para verificar
-            - name: List local Docker images
-              run: docker images
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Wait for image propagation
+        run: sleep 10
 
-            # Desplegar a Azure Web App
-            - name: Deploy to Azure Web App
-              uses: azure/webapps-deploy@v2
-              with:
-                  app-name: user-auth
-                  publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-                  images: ghcr.io/ics-pa-2025/microservicio-auth:latest
+      - name: Deploy to Droplet via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          password: ${{ secrets.DROPLET_PASSWORD }}
+          port: ${{ secrets.DROPLET_SSH_PORT || '22' }}
+          script: |
+            set -e
+            mkdir -p /home/${{ secrets.DROPLET_USER }}/safestore
+            cat > /home/${{ secrets.DROPLET_USER }}/safestore/.env <<EOF
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            JWT_ACCESS_EXPIRES=${{ secrets.JWT_ACCESS_EXPIRES }}
+            JWT_REFRESH_EXPIRES=${{ secrets.JWT_REFRESH_EXPIRES }}
+            SEED_RBAC=${{ secrets.SEED_RBAC }}
+            PORT=${{ secrets.PORT }}
+            FRONTEND_URL_DEV=${{ secrets.FRONTEND_URL_DEV }}
+            FRONTEND_URL_PROD=${{ secrets.FRONTEND_URL_PROD }}
+            NODE_ENV=production
+            EOF
+            chown ${{ secrets.DROPLET_USER }}:$${{ secrets.DROPLET_USER }} /home/${{ secrets.DROPLET_USER }}/safestore/.env || true
+            chmod 600 /home/${{ secrets.DROPLET_USER }}/safestore/.env || true
+            docker pull ghcr.io/${{ github.repository_owner }}/safestore-auth:latest
+            docker compose -f /home/${{ secrets.DROPLET_USER }}/safestore/docker-compose.prod.yml pull
+            docker compose -f /home/${{ secrets.DROPLET_USER }}/safestore/docker-compose.prod.yml up -d

@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  auth:
+    image: ghcr.io/${GITHUB_OWNER:-ICS-PA-2025}/safestore-auth:latest
+    container_name: safestore-auth
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=production
+    ports:
+      - '3001:3001'
