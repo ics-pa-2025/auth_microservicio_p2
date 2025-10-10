@@ -48,8 +48,8 @@ jobs:
           port: ${{ secrets.DROPLET_SSH_PORT || '22' }}
           script: |
             set -e
-            mkdir -p /home/${{ secrets.DROPLET_USER }}/safestore
-            cat > /home/${{ secrets.DROPLET_USER }}/safestore/.env <<EOF
+            mkdir -p /home/${{ secrets.DROPLET_USER }}/auth_microservicio_p2
+            cat > /home/${{ secrets.DROPLET_USER }}/auth_microservicio_p2/.env <<EOF
             DB_HOST=${{ secrets.DB_HOST }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
@@ -64,8 +64,8 @@ jobs:
             FRONTEND_URL_PROD=${{ secrets.FRONTEND_URL_PROD }}
             NODE_ENV=production
             EOF
-            chown ${{ secrets.DROPLET_USER }}:$${{ secrets.DROPLET_USER }} /home/${{ secrets.DROPLET_USER }}/safestore/.env || true
-            chmod 600 /home/${{ secrets.DROPLET_USER }}/safestore/.env || true
+            chown ${{ secrets.DROPLET_USER }}:$${{ secrets.DROPLET_USER }} /home/${{ secrets.DROPLET_USER }}/auth_microservicio_p2/.env || true
+            chmod 600 /home/${{ secrets.DROPLET_USER }}/auth_microservicio_p2/.env || true
             docker pull ghcr.io/${{ github.repository_owner }}/auth_microservicio_p2:latest
-            docker compose -f /home/${{ secrets.DROPLET_USER }}/safestore/docker-compose.prod.yml pull
-            docker compose -f /home/${{ secrets.DROPLET_USER }}/safestore/docker-compose.prod.yml up -d
+            docker compose -f /home/${{ secrets.DROPLET_USER }}/auth_microservicio_p2/docker-compose.prod.yml pull
+            docker compose -f /home/${{ secrets.DROPLET_USER }}/auth_microservicio_p2/docker-compose.prod.yml up -d
