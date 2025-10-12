@@ -1,4 +1,3 @@
-// user.entity.ts (actualizada)
 import {
     Column,
     CreateDateColumn,
@@ -14,6 +13,15 @@ import { Role } from '../../role/entities/role.entity';
 export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string;
+
+    @Column({ nullable: false })
+    fullname: string;
+
+    @Column({ nullable: true })
+    phone: string;
+
+    @Column({ nullable: true })
+    address: string;
 
     @Column({ unique: true })
     email: string;
