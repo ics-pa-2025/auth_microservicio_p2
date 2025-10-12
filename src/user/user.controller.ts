@@ -4,6 +4,7 @@ import {
     Delete,
     Get,
     Param,
+    Patch,
     Post,
     Put,
     ValidationPipe,
@@ -11,6 +12,7 @@ import {
 import { UserService } from './user.service';
 import { RequirePermissions } from 'src/decorators/permissions.decorator';
 import { AssignRolesDto } from './dto/assign-roles.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -20,6 +22,14 @@ export class UserController {
     @RequirePermissions('users:read')
     getUserWithRoles(@Param('id') id: string) {
         return this.userService.getUserWithRoles(id);
+    }
+
+    @Patch(':id')
+    updateUser(
+        @Param('id') id: string,
+        @Body(ValidationPipe) updateUserDto: UpdateUserDto
+    ) {
+        return this.userService.updateUser(id, updateUserDto);
     }
 
     @Post(':id/roles')

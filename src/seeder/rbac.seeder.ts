@@ -218,7 +218,8 @@ export class RbacSeeder implements OnModuleInit {
             const passwordHash = await this.hashPassword(adminPassword);
             const adminUser = await this.userService.create(
                 adminEmail,
-                passwordHash
+                passwordHash,
+                'martin'
             );
 
             // Asignar rol super_admin

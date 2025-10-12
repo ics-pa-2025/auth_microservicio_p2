@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Role } from 'src/role/entities/role.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ResponseUserDto } from './dto/response-user.dto';
 
 @Injectable()
 export class UserService {
@@ -17,12 +19,35 @@ export class UserService {
         return this.repo.findOne({ where: { email } });
     }
 
+    async updateUser(
+        id: string,
+        updateUserDto: UpdateUserDto
+    ): Promise<ResponseUserDto> {
+        const user = await this.repo.findOne({ where: { id } });
+
+        if (!user) {
+            throw new NotFoundException('Usuario no encontrado');
+        }
+
+        Object.assign(user, updateUserDto);
+
+        this.repo.save(user);
+
+        return new ResponseUserDto(
+            user.id,
+            user.email,
+            user.fullname,
+            user.phone,
+            user.address
+        );
+    }
+
     findById(id: string) {
         return this.repo.findOne({ where: { id } });
     }
 
-    async create(email: string, password: string) {
-        const user = this.repo.create({ email, password });
+    async create(email: string, password: string, fullname: string) {
+        const user = this.repo.create({ email, password, fullname });
         return this.repo.save(user);
     }
 
