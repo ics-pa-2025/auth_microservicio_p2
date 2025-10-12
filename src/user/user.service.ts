@@ -46,8 +46,8 @@ export class UserService {
         return this.repo.findOne({ where: { id } });
     }
 
-    async create(email: string, password: string) {
-        const user = this.repo.create({ email, password });
+    async create(email: string, password: string, fullname: string) {
+        const user = this.repo.create({ email, password, fullname });
         return this.repo.save(user);
     }
 

@@ -9,6 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './dto/regiter.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResponseUserDto } from '../user/dto/response-user.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -30,19 +32,29 @@ export class AuthService {
             );
         }
 
+        console.log('Register DTO:', registerDto); // Log para debugging
+
         const passwordHash = await this.hash(registerDto.password);
-        const user = await this.users.create(registerDto.email, passwordHash);
+        const user = await this.users.create(
+            registerDto.email,
+            passwordHash,
+            registerDto.fullname
+        );
 
         const { accessToken, refreshToken } = await this.issueTokens(
             user.id,
             user.email
         );
 
-        return {
-            accessToken,
-            refreshToken,
-            user: { id: user.id, email: user.email }, // No devolver hash de password
-        };
+        const userDto = new ResponseUserDto(
+            user.id,
+            user.email,
+            user.fullname,
+            user.phone,
+            user.address
+        );
+
+        return new AuthResponseDto(accessToken, refreshToken, userDto);
     }
 
     // ---------- LOGIN ----------
@@ -61,11 +73,15 @@ export class AuthService {
             user.email
         );
 
-        return {
-            accessToken,
-            refreshToken,
-            user: { id: user.id, email: user.email },
-        };
+        const userDto = new ResponseUserDto(
+            user.id,
+            user.email,
+            user.fullname,
+            user.phone,
+            user.address
+        );
+
+        return new AuthResponseDto(accessToken, refreshToken, userDto);
     }
 
     // ---------- REFRESH TOKEN ----------

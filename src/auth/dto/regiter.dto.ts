@@ -20,4 +20,8 @@ export class RegisterDto {
             'La contraseña debe contener al menos: 1 minúscula, 1 mayúscula y 1 número',
     })
     password: string;
+
+    @IsString({ message: 'El nombre completo debe ser un string' })
+    @IsNotEmpty({ message: 'El nombre completo es requerido' })
+    fullname: string;
 }
