@@ -38,7 +38,9 @@ export class AuthService {
         const user = await this.users.create(
             registerDto.email,
             passwordHash,
-            registerDto.fullname
+            registerDto.fullname,
+            registerDto.phone ?? '',
+            registerDto.address ?? ''
         );
 
         const { accessToken, refreshToken } = await this.issueTokens(

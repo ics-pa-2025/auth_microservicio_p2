@@ -5,6 +5,7 @@ import {
     Matches,
     MaxLength,
     MinLength,
+    IsOptional
 } from 'class-validator';
 
 export class RegisterDto {
@@ -24,4 +25,12 @@ export class RegisterDto {
     @IsString({ message: 'El nombre completo debe ser un string' })
     @IsNotEmpty({ message: 'El nombre completo es requerido' })
     fullname: string;
+
+    @IsOptional()
+    @IsString({ message: 'El teléfono debe ser un string' })
+    phone?: string;
+
+    @IsOptional()
+    @IsString({ message: 'La dirección debe ser un string' })
+    address?: string;
 }
