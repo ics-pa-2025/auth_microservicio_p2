@@ -15,6 +15,30 @@ export class UserService {
         private roleRepository: Repository<Role>
     ) {}
 
+    getAll() {
+        const users = this.repo.find();
+        return users.then((users) =>
+            users.map(
+                (user) =>
+                    new ResponseUserDto(
+                        user.id,
+                        user.email,
+                        user.fullname,
+                        user.phone,
+                        user.address,
+                        user.isActive,
+                        user.roles ? user.roles.map((role) => role.id) : []
+                    )
+            )
+        );
+    }
+
+    async deleteById(id: string){
+        const user = await this.repo.findOne({ where: { id } });
+        const isActive = false
+        await this.repo.update({ id: id }, { isActive });
+    }
+
     findByEmail(email: string) {
         return this.repo.findOne({ where: { email } });
     }
@@ -46,8 +70,8 @@ export class UserService {
         return this.repo.findOne({ where: { id } });
     }
 
-    async create(email: string, password: string, fullname: string) {
-        const user = this.repo.create({ email, password, fullname });
+    async create(email: string, password: string, fullname: string, phone: string = "", address: string = "") {
+        const user = this.repo.create({ email, password, fullname, phone, address });
         return this.repo.save(user);
     }
 

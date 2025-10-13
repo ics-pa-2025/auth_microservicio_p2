@@ -18,6 +18,18 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
+    @Get()
+    @RequirePermissions('users:read')
+    getAll() {
+        return this.userService.getAll();
+    }
+
+    @Delete(':id')
+    deleteById(@Param('id') id : string)
+    {
+        this.userService.deleteById(id)
+    }
+
     @Get(':id/roles')
     @RequirePermissions('users:read')
     getUserWithRoles(@Param('id') id: string) {
