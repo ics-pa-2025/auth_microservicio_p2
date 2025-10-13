@@ -33,7 +33,7 @@ export class RoleController {
     }
 
     @Get()
-    @RequirePermissions('roles:read')
+    // @RequirePermissions('roles:read')
     findAll() {
         return this.roleService.findAll();
     }
