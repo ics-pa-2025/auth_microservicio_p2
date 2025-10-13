@@ -15,6 +15,24 @@ export class UserService {
         private roleRepository: Repository<Role>
     ) {}
 
+    getAll() {
+        const users = this.repo.find();
+        return users.then((users) =>
+            users.map(
+                (user) =>
+                    new ResponseUserDto(
+                        user.id,
+                        user.email,
+                        user.fullname,
+                        user.phone,
+                        user.address,
+                        user.isActive,
+                        user.roles ? user.roles.map((role) => role.id) : []
+                    )
+            )
+        );
+    }
+
     findByEmail(email: string) {
         return this.repo.findOne({ where: { email } });
     }
