@@ -66,7 +66,7 @@ export class AuthService {
         if (!ok) throw new UnauthorizedException('Credenciales inválidas');
 
         // Opcional: Verificar si el usuario está activo/verificado
-        // if (!user.isActive) throw new ForbiddenException('Cuenta desactivada');
+        if (!user.isActive) throw new UnauthorizedException('Cuenta desactivada');
 
         const { accessToken, refreshToken } = await this.issueTokens(
             user.id,

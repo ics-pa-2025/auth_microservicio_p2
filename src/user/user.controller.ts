@@ -24,6 +24,12 @@ export class UserController {
         return this.userService.getAll();
     }
 
+    @Delete(':id')
+    deleteById(@Param('id') id : string)
+    {
+        this.userService.deleteById(id)
+    }
+
     @Get(':id/roles')
     @RequirePermissions('users:read')
     getUserWithRoles(@Param('id') id: string) {

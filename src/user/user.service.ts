@@ -33,6 +33,12 @@ export class UserService {
         );
     }
 
+    async deleteById(id: string){
+        const user = await this.repo.findOne({ where: { id } });
+        const isActive = false
+        await this.repo.update({ id: id }, { isActive });
+    }
+
     findByEmail(email: string) {
         return this.repo.findOne({ where: { email } });
     }
