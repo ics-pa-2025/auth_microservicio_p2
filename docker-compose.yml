@@ -2,7 +2,7 @@ services:
     mysql:
         image: mysql:8.0
         container_name: mysql-auth-safestore
-        restart: always
+        restart: no
         env_file:
             - .env
         environment:
